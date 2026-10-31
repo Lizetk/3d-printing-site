@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мир 3D-печати: от идеи до реальности</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --cyan: #00D4FF; --orange: #FF6B00; --dark-bg: #0a0a0f; --card-bg: rgba(255,255,255,0.05); --border: rgba(255,255,255,0.1); }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--dark-bg); color: #fff; line-height: 1.6; overflow-x: hidden; }
+        header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,10,15,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 1rem 2rem; }
+        .header-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: bold; background: linear-gradient(135deg, var(--cyan), var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lang-toggle { padding: 0.5rem 1rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; color: #fff; cursor: pointer; transition: all 0.3s; font-size: 0.9rem; }
+        .lang-toggle:hover { background: rgba(255,255,255,0.1); border-color: var(--cyan); }
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 6rem 2rem 2rem; }
+        .hero-bg { position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(0,212,255,0.1) 0%, transparent 50%), radial-gradient(circle at 70% 70%, rgba(255,107,0,0.1) 0%, transparent 50%); }
+        .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(0,212,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.1) 1px, transparent 1px); background-size: 50px 50px; opacity: 0.3; }
+        .hero-content { position: relative; z-index: 10; text-align: center; max-width: 900px; }
+        .hero-icon { font-size: 8rem; margin-bottom: 2rem; animation: bounce 3s infinite; }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+        .hero h1 { font-size: clamp(2.5rem,6vw,4.5rem); font-weight: bold; margin-bottom: 1.5rem; background: linear-gradient(135deg, var(--cyan), #4facfe, var(--orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero p { font-size: 1.25rem; color: #a0a0a0; margin-bottom: 2rem; }
+        .cta-button { display: inline-block; padding: 1rem 2.5rem; background: linear-gradient(135deg, var(--cyan), #4facfe); border-radius: 50px; color: #fff; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: all 0.3s; box-shadow: 0 10px 30px rgba(0,212,255,0.3); border: none; cursor: pointer; }
+        .cta-button:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,212,255,0.4); }
+        section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
+        section.alt-bg { background: rgba(255,255,255,0.02); max-width: 100%; }
+        section.alt-bg > div { max-width: 1200px; margin: 0 auto; }
+        h2 { font-size: clamp(2rem,4vw,3rem); text-align: center; margin-bottom: 3rem; }
+        .glass-card { background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; transition: all 0.3s; }
+        .glass-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-5px); }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        .material-card { border-radius: 20px; padding: 2rem; text-align: center; transition: all 0.3s; }
+        .material-card:hover { transform: translateY(-8px); }
+        .material-card h3 { font-size: 2rem; margin-bottom: 1rem; }
+        .printer-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 15px; padding: 1.5rem; margin-bottom: 1rem; transition: all 0.3s; }
+        .printer-item:hover { border-color: var(--cyan); transform: translateX(5px); }
+        .printer-name { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .printer-price { color: var(--cyan); font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .accordion-item { border: 1px solid var(--border); border-radius: 15px; margin-bottom: 1rem; overflow: hidden; }
+        .accordion-header { padding: 1.5rem; background: var(--card-bg); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s; }
+        .accordion-header:hover { background: rgba(255,255,255,0.1); }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; padding: 0 1.5rem; }
+        .accordion-content.active { max-height: 500px; padding: 1.5rem; }
+        .quiz-container { max-width: 700px; margin: 0 auto; }
+        .quiz-question { font-size: 1.5rem; margin-bottom: 2rem; }
+        .quiz-option { display: block; width: 100%; padding: 1rem 1.5rem; margin-bottom: 1rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; color: #fff; cursor: pointer; transition: all 0.3s; text-align: left; font-size: 1rem; }
+        .quiz-option:hover { border-color: var(--cyan); background: rgba(0,212,255,0.1); }
+        .quiz-option.correct { background: rgba(0,255,100,0.2); border-color: #00ff64; }
+        .quiz-option.incorrect { background: rgba(255,50,50,0.2); border-color: #ff3232; }
+        .progress-bar { width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 2rem; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--orange)); transition: width 0.3s; }
+        .dict-table { width: 100%; border-collapse: collapse; margin-top: 2rem; }
+        .dict-table th { text-align: left; padding: 1rem; color: var(--cyan); border-bottom: 2px solid var(--border); font-weight: 600; }
+        .dict-table td { padding: 1rem; border-bottom: 1px solid var(--border); }
+        .dict-table tr:hover { background: rgba(255,255,255,0.05); }
+        footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: #666; }
+        a { color: var(--cyan); text-decoration: none; transition: color 0.3s; }
+        a:hover { color: #4facfe; }
+        .tag { display: inline-block; padding: 0.5rem 1rem; background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); border-radius: 20px; margin: 0.25rem; font-size: 0.9rem; }
+        .fade-in { opacity: 0; transform: translateY(30px); transition: all 0.6s ease-out; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+        @media (max-width: 768px) { .hero-icon { font-size: 5rem; } section { padding: 3rem 1rem; } .grid-4 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">🖨️ 3D Print</div>
+            <button class="lang-toggle" onclick="toggleLanguage()"><span id="langFlag">🇷🇺</span> <span id="langText">RU</span></button>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <div class="hero-icon">🖨️</div>
+            <h1 id="heroTitle">Мир 3D-печати: от идеи до реальности</h1>
+            <p id="heroSubtitle">Полный гид для новичков: узнай, как превращать цифровые модели в реальные объекты у себя дома</p>
+
+        </div>
+    </section>
+
+    <section id="about" class="fade-in">
+        <h2 id="aboutTitle">🖨️ Что такое 3D-печать?</h2>
+        <p style="text-align:center;max-width:800px;margin:0 auto 3rem;color:#a0a0a0;font-size:1.1rem" id="aboutDesc"></p>
+        <div class="grid-4" id="aboutCards"></div>
+    </section>
+
+    <section class="alt-bg fade-in">
+        <div>
+            <h2 id="materialsTitle">🧵 Материалы (Филаменты)</h2>
+            <div class="grid-4" id="materialsCards"></div>
+        </div>
+    </section>
+
+    <section id="printers" class="fade-in">
+        <h2 id="printersTitle">⚙️ Гид по принтерам</h2>
+        <p style="text-align:center;margin-bottom:2rem;color:#a0a0a0" id="printersSubtitle"></p>
+        <div id="printersList"></div>
+    </section>
+
+    <section class="alt-bg fade-in">
+        <div>
+            <h2 id="slicerTitle">🧠 Слайсер и модели</h2>
+            <p style="text-align:center;max-width:800px;margin:0 auto 3rem;color:#a0a0a0;font-size:1.1rem" id="slicerDesc"></p>
+            <div class="grid-3" id="slicerCards"></div>
+            <div style="text-align:center;margin-top:3rem">
+                <h3 style="margin-bottom:1.5rem" id="modelsTitle"></h3>
+                <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:1rem">
+                    <a href="https://makerworld.com/ru" target="_blank" class="tag">MakerWorld ↗</a>
+                    <a href="https://printables.com" target="_blank" class="tag">Printables ↗</a>
+                    <a href="https://thingiverse.com" target="_blank" class="tag">Thingiverse ↗</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="problems" class="fade-in">
+        <h2 id="problemsTitle">🛠️ Типичные проблемы новичка</h2>
+        <div id="problemsList"></div>
+    </section>
+
+    <section class="alt-bg fade-in">
+        <div>
+            <h2 id="safetyTitle">🛡️ Постобработка и безопасность</h2>
+            <div class="grid-3" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+                <div class="glass-card">
+                    <h3 style="color:var(--orange);margin-bottom:1rem" id="postTitle"></h3>
+                    <p style="color:#a0a0a0" id="postDesc"></p>
+                </div>
+                <div class="glass-card">
+                    <h3 style="color:#ff3232;margin-bottom:1rem" id="safetyRulesTitle"></h3>
+                    <ul style="color:#a0a0a0;list-style:none" id="safetyList"></ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="why" class="fade-in">
+        <h2 id="whyTitle">💡 Зачем это тебе?</h2>
+        <div class="grid-3" id="whyCards"></div>
+        <div style="text-align:center;margin-top:3rem">
+            <h3 style="margin-bottom:1.5rem" id="canPrintTitle"></h3>
+            <div id="canPrintList"></div>
+        </div>
+    </section>
+
+    <section class="alt-bg fade-in">
+        <div>
+            <h2 id="quizTitle">🧠 Интерактивный тест</h2>
+            <p style="text-align:center;margin-bottom:2rem;color:#a0a0a0" id="quizSubtitle"></p>
+            <div class="quiz-container">
+                <div id="quizStart" style="text-align:center">
+                    <button onclick="startQuiz()" class="cta-button" id="quizStartBtn"></button>
+                </div>
+                <div id="quizContent" style="display:none">
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="glass-card">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:1rem;color:#666;font-size:0.9rem">
+                            <span id="questionNumber"></span>
+                        </div>
+                        <h3 class="quiz-question" id="questionText"></h3>
+                        <div id="optionsContainer"></div>
+                    </div>
+                </div>
+                <div id="quizResult" style="display:none;text-align:center">
+                    <div class="glass-card">
+                        <div style="font-size:5rem;margin-bottom:1rem" id="resultEmoji"></div>
+                        <h3 style="font-size:2rem;margin-bottom:1rem" id="resultScore"></h3>
+                        <p style="font-size:1.2rem;margin-bottom:2rem;color:#a0a0a0" id="resultText"></p>
+                        <button onclick="resetQuiz()" class="cta-button" id="restartBtn"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="fade-in">
+        <h2 id="faqTitle">❓ Частые вопросы (FAQ)</h2>
+        <div id="faqList"></div>
+    </section>
+
+    <section class="alt-bg fade-in">
+        <div>
+            <h2 id="dictTitle">📚 Словарь терминов (English)</h2>
+            <p style="text-align:center;margin-bottom:2rem;color:#a0a0a0" id="dictSubtitle"></p>
+            <div style="overflow-x:auto">
+                <table class="dict-table">
+                    <thead><tr><th id="dictHeader1">English Term</th><th id="dictHeader2">Русский перевод</th><th id="dictHeader3">Контекст / Пример</th></tr></thead>
+                    <tbody id="dictBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2rem;text-align:left;margin-bottom:2rem">
+            <div>
+                <h3 style="margin-bottom:1rem" id="footerLinksTitle"></h3>
+                <p style="margin-bottom:0.5rem" id="footerModelsLabel"></p>
+                <a href="https://makerworld.com" target="_blank" style="display:block;margin-bottom:0.5rem">MakerWorld</a>
+                <a href="https://printables.com" target="_blank" style="display:block;margin-bottom:0.5rem">Printables</a>
+                <a href="https://thingiverse.com" target="_blank" style="display:block">Thingiverse</a>
+            </div>
+            <div>
+                <h3 style="margin-bottom:1rem" id="footerCommunityTitle"></h3>
+                <p style="margin-bottom:0.5rem">Reddit: r/3Dprinting</p>
+                <p style="margin-bottom:0.5rem">YouTube: 3D Printing Nerd</p>
+                <p>Telegram: 3D Print Chat</p>
+            </div>
+            <div>
+                <h3 style="margin-bottom:1rem">🖨️ 3D Print Guide</h3>
+                <p style="font-size:0.9rem" id="footerDesc"></p>
+            </div>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:2rem" id="footerRights"></div>
+    </footer>
+
+    <script>
+    let currentLang = 'ru';
+    let currentQuestion = 0;
+    let score = 0;
+
+    const T = {
+        ru: {
+            heroTitle:'Мир 3D-печати: от идеи до реальности',
+            heroSubtitle:'Полный гид для новичков: узнай, как превращать цифровые модели в реальные объекты у себя дома',
+
+            aboutTitle:'🖨️ Что такое 3D-печать?',
+            aboutDesc:'3D-печать (FDM — Fused Deposition Modeling) — это технология послойного создания объектов из расплавленного пластика. Принтер наносит тонкие слои материала, формируя деталь слой за слоем, как горячий клеевой пистолет, но с точностью до 0.1 мм.',
+            aboutCards:[
+                {icon:'⚙️',title:'Экструдер',desc:'Протягивает филамент через систему шестерён'},
+                {icon:'🔥',title:'Хотэнд',desc:'Плавит пластик до 200-300°C'},
+                {icon:'📐',title:'Стол',desc:'Нагретая платформа для прилипания первого слоя'},
+                {icon:'💧',title:'Сопло',desc:'Тонкое отверстие (обычно 0.4 мм), через которое выдавливается пластик'}
+            ],
+            materialsTitle:'🧵 Материалы (Филаменты)',
+            materials:[
+                {name:'PLA',desc:'Биоразлагаемый, лёгкий в печати. Идеален для новичков.',diff:'Легко',temp:'190-220°C',use:'Декор, прототипы, игрушки',color:'#00D4FF'},
+                {name:'PETG',desc:'Прочный, устойчив к температуре. Хороший баланс свойств.',diff:'Средне',temp:'220-250°C',use:'Функциональные детали, посуда',color:'#00ff64'},
+                {name:'ABS',desc:'Очень прочный, ударостойкий. Нужна вентиляция!',diff:'Сложно',temp:'230-260°C',use:'Автомобильные детали, корпуса',color:'#ff3232'},
+                {name:'TPU',desc:'Гибкий, резиноподобный. Для эластичных деталей.',diff:'Средне',temp:'210-230°C',use:'Чехлы, прокладки, обувь',color:'#ffd700'}
+            ],
+            printersTitle:'⚙️ Гид по принтерам',
+            printersSubtitle:'Выбери свой первый 3D-принтер',
+            printers:[
+                {name:'Creality Ender 3 V3 KE',price:'21 000 ₽',forWhom:'Новички, энтузиасты',features:'Высокая скорость (до 500 мм/с), автовыравнивание, прямой экструдер. Лучшее соотношение цена/качество.'},
+                {name:'Bambu Lab A1 mini',price:'20 000 ₽',forWhom:'Новички, дети, компактные столы',features:'Очень тихий, простая сборка, отличная экосистема. Можно докупить AMS Lite для 4 цветов.'},
+                {name:'Bambu Lab A1 Combo',price:'45 000 ₽',forWhom:'Те, кто хочет мультицвет сразу',features:'Полноразмерный стол (256 мм), система подавления вибраций, AMS Lite для 4 цветов в комплекте.'},
+                {name:'Creality SPARKX i7 Color Combo',price:'53 000 ₽',forWhom:'Гики, любители инноваций',features:'AI-камера (фото в 3D-модель в 1 клик), система CFS Lite для мультицвета, тихий ночной режим (45 дБ).'},
+                {name:'Bambu Lab P1S',price:'70 000 ₽',forWhom:'Продвинутые пользователи',features:'Закрытый корпус (можно печатать ABS/ASA), высочайшая надёжность и скорость "из коробки".'}
+            ],
+            slicerTitle:'🧠 Слайсер и модели',
+            slicerDesc:'Слайсер — это программа, которая превращает 3D-модель (.STL) в инструкции для принтера (G-код). Он нарезает модель на слои и генерирует траекторию движения.',
+            slicerCards:[
+                {icon:'📏',title:'Высота слоя',desc:'0.2 мм — баланс качества и скорости'},
+                {icon:'🔲',title:'Заполнение (Infill)',desc:'15-20% для декора, 40-100% для прочных деталей'},
+                {icon:'🏗️',title:'Поддержки',desc:'Включайте для нависающих элементов (>45°)'}
+            ],
+            modelsTitle:'Где брать модели:',
+            problemsTitle:'🛠️ Типичные проблемы новичка',
+            problems:[
+                {title:'Первый слой не прилипает',solution:'Очистите стол изопропиловым спиртом, откалибруйте Z-offset, убедитесь, что стол нагрет до нужной температуры.'},
+                {title:'Паутина (Stringing)',solution:'Тонкие нити пластика между деталями. Повысьте температуру и скорость ретракта в слайсере, просушите филамент.'},
+                {title:'Сдвиг слоёв (Layer shifting)',solution:'Модель "съехала". Проверьте натяжение ремней, убедитесь, что модель не оторвалась от стола.'},
+                {title:'"Слоновья нога" (Elephant\'s foot)',solution:'Первый слой расплющен. Опустите температуру стола или увеличьте Z-offset.'}
+            ],
+            safetyTitle:'🛡️ Постобработка и безопасность',
+            postTitle:'Постобработка:',
+            postDesc:'Деталь редко идеальна сразу. Удаление поддержек (кусачками), шлифовка наждачной бумагой, грунтовка и покраска акрилом. Для ABS — сглаживание парами ацетона.',
+            safetyRulesTitle:'Безопасность:',
+            safetyItems:['Никогда не трогайте хотэнд и стол во время печати (250-300°C)','Печатайте ABS только в проветриваемом помещении (выделяет стирол)','Следите за движущимися частями (ремни, валы)'],
+            whyTitle:'💡 Зачем это тебе?',
+            whyCards:[
+                {icon:'🎨',title:'Хобби',desc:'Создавай уникальные фигурки, аксессуары, украшения для дома'},
+                {icon:'🔬',title:'Прототипирование',desc:'Быстро воплощай идеи в физические объекты для тестирования'},
+                {icon:'📖',title:'Обучение',desc:'Развивай инженерное мышление и навыки 3D-моделирования'}
+            ],
+            canPrintTitle:'Что можно печатать:',
+            canPrint:['Фигурки и миниатюры','Запчасти для техники','Органайзеры и holders','Подарки друзьям','Учебные модели','Кастомные чехлы'],
+            quizTitle:'🧠 Интерактивный тест',
+            quizSubtitle:'Проверь свои знания о 3D-печати!',
+            quizStartBtn:'🚀 Начать тест',
+            quiz:[
+                {q:'Что делает слайсер?',options:['Рисует 3D-модели','Преобразует 3D-модель в G-код','Нагревает пластик','Калибрует стол'],correct:1},
+                {q:'Какой пластик лучше всего подходит для новичков?',options:['ABS','TPU','PLA','Nylon'],correct:2},
+                {q:'Какой материал является гибким?',options:['PLA','PETG','ABS','TPU'],correct:3},
+                {q:'Что такое "инфилл" (infill)?',options:['Внешняя стенка модели','Внутреннее заполнение модели','Тип сопла','Скорость печати'],correct:1},
+                {q:'Какой принтер имеет закрытый корпус для печати ABS?',options:['Ender 3 V3 KE','Bambu Lab A1 mini','Bambu Lab P1S','Ender 3 S1'],correct:2},
+                {q:'Для чего нужен подогреваемый стол?',options:['Для сушки пластика','Улучшить прилипание первого слоя','Для охлаждения модели','Для калибровки'],correct:1},
+                {q:'Какая функция есть у Creality SPARKX i7 Color Combo?',options:['Лазерная гравировка','AI-преобразование фото в 3D и мультицвет','Печать металлом','Вакуумная формовка'],correct:1},
+                {q:'Что делать, если появляется "паутина" (stringing)?',options:['Увеличить скорость','Настроить ретракт и просушить пластик','Сменить сопло','Выключить вентилятор'],correct:1},
+                {q:'Где можно скачать бесплатные 3D-модели?',options:['YouTube','MakerWorld, Printables','Instagram','Wikipedia'],correct:1},
+                {q:'Почему для ABS нужна вентиляция?',options:['Чтобы пластик быстрее остывал','Чтобы избежать вдыхания вредных испарений стирола','Для лучшего прилипания','Для охлаждения электроники'],correct:1}
+            ],
+            quizResults:{low:'🤔 Пока не нужен — но не расстраивайся! Прочитай гид ещё раз и попробуй снова.',mid:'🤓 Надо подумать — у тебя уже есть база! Ещё немного практики.',high:'🎉 Однозначно нужен! Ты готов к миру 3D-печати!'},
+            faqTitle:'❓ Частые вопросы (FAQ)',
+            faq:[
+                {q:'Сколько стоит начать заниматься 3D-печатью?',a:'Минимальный бюджет — около 20 000 ₽ за принтер (Bambu Lab A1 mini или Ender 3 V3 KE) + 1000-2000 ₽ на первый пластик.'},
+                {q:'Нужно ли уметь 3D-моделировать?',a:'Нет! На сайтах вроде MakerWorld и Printables есть миллионы готовых моделей. Моделирование — это следующий шаг.'},
+                {q:'Сколько времени занимает печать?',a:'От 30 минут (маленькая фигурка) до 20+ часов (большая деталь). Зависит от размера, заполнения и скорости.'},
+                {q:'Какой принтер выбрать для первого раза?',a:'Bambu Lab A1 mini — самый простой и тихий. Ender 3 V3 KE — больше возможностей за те же деньги.'},
+                {q:'Можно ли печатать еду/посуду?',a:'Технически PLA безопасен, но слой за слоем накапливает бактерии. Для контакта с едой лучше использовать специальные решения.'}
+            ],
+            dictTitle:'📚 Словарь терминов (English)',
+            dictSubtitle:'Основные термины на английском для урока',
+            dictHeaders:['English Term','Русский перевод','Контекст / Пример'],
+            dictionary:[
+                {en:'3D Printer',ru:'3D-принтер',ctx:'I want to buy a reliable 3D printer.'},
+                {en:'Filament',ru:'Филамент (пластиковая нить)',ctx:'PLA is the most popular filament for beginners.'},
+                {en:'Extruder',ru:'Экструдер',ctx:'The extruder pushes the filament into the hotend.'},
+                {en:'Nozzle',ru:'Сопло',ctx:'The standard nozzle size is 0.4 mm.'},
+                {en:'Slicer',ru:'Слайсер',ctx:'I use Orca Slicer to prepare my models.'},
+                {en:'Infill',ru:'Заполнение',ctx:'20% infill is enough for most decorative parts.'},
+                {en:'Bed adhesion',ru:'Адгезия к столу',ctx:'Good bed adhesion is key to a successful print.'},
+                {en:'Stringing',ru:'Паутина (нити пластика)',ctx:'I need to adjust retraction to fix stringing.'},
+                {en:'Supports',ru:'Поддержки',ctx:"Don't forget to add supports for overhangs."},
+                {en:'Layer height',ru:'Высота слоя',ctx:'0.2 mm layer height is a good balance of speed and quality.'}
+            ],
+            footerLinksTitle:'Полезные ссылки',
+            footerModelsLabel:'Модели:',
+            footerCommunityTitle:'Сообщество',
+            footerDesc:'Этот сайт создан для тех, кто хочет начать своё путешествие в мир 3D-печати. Удачи!',
+            footerRights:'© 2025 Мир 3D-печати. Создано с 💙 для новичков.',
+            scoreLabel:'Баллы',
+            restartBtn:'Пройти заново',
+            forWhomLabel:'Для кого',
+            featuresLabel:'Особенности',
+            diffLabel:'Сложность',
+            tempLabel:'Температура',
+            useLabel:'Применение'
+        },
+        en: {
+            heroTitle:'The World of 3D Printing: From Idea to Reality',
+            heroSubtitle:'A complete guide for beginners: learn how to turn digital models into real objects at home',
+
+            aboutTitle:'🖨️ What is 3D Printing?',
+            aboutDesc:'3D printing (FDM — Fused Deposition Modeling) is a technology of creating objects layer by layer from melted plastic. The printer deposits thin layers of material, building the part layer by layer, like a hot glue gun, but with precision up to 0.1 mm.',
+            aboutCards:[
+                {icon:'⚙️',title:'Extruder',desc:'Pushes filament through the gear system'},
+                {icon:'🔥',title:'Hotend',desc:'Melts plastic to 200-300°C'},
+                {icon:'📐',title:'Build Plate',desc:'Heated platform for first layer adhesion'},
+                {icon:'💧',title:'Nozzle',desc:'Tiny opening (usually 0.4 mm) where plastic is extruded'}
+            ],
+            materialsTitle:'🧵 Materials (Filaments)',
+            materials:[
+                {name:'PLA',desc:'Biodegradable, easy to print. Perfect for beginners.',diff:'Easy',temp:'190-220°C',use:'Decor, prototypes, toys',color:'#00D4FF'},
+                {name:'PETG',desc:'Strong, heat resistant. Good balance of properties.',diff:'Medium',temp:'220-250°C',use:'Functional parts, tableware',color:'#00ff64'},
+                {name:'ABS',desc:'Very strong, impact resistant. Needs ventilation!',diff:'Hard',temp:'230-260°C',use:'Automotive parts, enclosures',color:'#ff3232'},
+                {name:'TPU',desc:'Flexible, rubber-like. For elastic parts.',diff:'Medium',temp:'210-230°C',use:'Cases, gaskets, shoes',color:'#ffd700'}
+            ],
+            printersTitle:'⚙️ Printer Guide',
+            printersSubtitle:'Choose your first 3D printer',
+            printers:[
+                {name:'Creality Ender 3 V3 KE',price:'~$290',forWhom:'Beginners, enthusiasts',features:'High speed (up to 500 mm/s), auto-leveling, direct extruder. Best price/quality ratio.'},
+                {name:'Bambu Lab A1 mini',price:'~$275',forWhom:'Beginners, kids, small desks',features:'Very quiet, easy assembly, great ecosystem. AMS Lite for 4 colors available separately.'},
+                {name:'Bambu Lab A1 Combo',price:'~$620',forWhom:'Those who want multi-color from the start',features:'Full-size bed (256 mm), vibration suppression system, AMS Lite for 4 colors included.'},
+                {name:'Creality SPARKX i7 Color Combo',price:'~$730',forWhom:'Geeks, innovation lovers',features:'AI camera (photo to 3D model in 1 click), CFS Lite multi-color system, quiet night mode (45 dB).'},
+                {name:'Bambu Lab P1S',price:'~$960',forWhom:'Advanced users',features:'Enclosed body (can print ABS/ASA), highest reliability and speed out of the box.'}
+            ],
+            slicerTitle:'🧠 Slicer & Models',
+            slicerDesc:'A slicer is a program that converts a 3D model (.STL) into printer instructions (G-code). It slices the model into layers and generates the movement path.',
+            slicerCards:[
+                {icon:'📏',title:'Layer Height',desc:'0.2 mm — balance of quality and speed'},
+                {icon:'🔲',title:'Infill',desc:'15-20% for decor, 40-100% for strong parts'},
+                {icon:'🏗️',title:'Supports',desc:'Enable for overhanging elements (>45°)'}
+            ],
+            modelsTitle:'Where to find models:',
+            problemsTitle:'🛠️ Common Beginner Problems',
+            problems:[
+                {title:'First layer not sticking',solution:'Clean the bed with isopropyl alcohol, calibrate Z-offset, make sure the bed is heated to the right temperature.'},
+                {title:'Stringing',solution:'Thin plastic threads between parts. Increase retraction temperature and speed in the slicer, dry the filament.'},
+                {title:'Layer shifting',solution:'The model "shifted". Check belt tension, make sure the model hasn\'t detached from the bed.'},
+                {title:"Elephant's foot",solution:'First layer is squished. Lower bed temperature or increase Z-offset.'}
+            ],
+            safetyTitle:'🛡️ Post-processing & Safety',
+            postTitle:'Post-processing:',
+            postDesc:'Parts are rarely perfect right away. Remove supports (with cutters), sand with sandpaper, prime and paint with acrylics. For ABS — acetone vapor smoothing.',
+            safetyRulesTitle:'Safety:',
+            safetyItems:['Never touch the hotend and bed during printing (250-300°C)','Print ABS only in a ventilated area (emits styrene)','Watch out for moving parts (belts, rods)'],
+            whyTitle:'💡 Why do you need this?',
+            whyCards:[
+                {icon:'🎨',title:'Hobby',desc:'Create unique figurines, accessories, home decorations'},
+                {icon:'🔬',title:'Prototyping',desc:'Quickly turn ideas into physical objects for testing'},
+                {icon:'📖',title:'Learning',desc:'Develop engineering thinking and 3D modeling skills'}
+            ],
+            canPrintTitle:'What you can print:',
+            canPrint:['Figurines and miniatures','Spare parts','Organizers and holders','Gifts for friends','Educational models','Custom cases'],
+            quizTitle:'🧠 Interactive Quiz',
+            quizSubtitle:'Test your knowledge about 3D printing!',
+            quizStartBtn:'🚀 Start Quiz',
+            quiz:[
+                {q:'What does a slicer do?',options:['Draws 3D models','Converts 3D model to G-code','Heats plastic','Calibrates the bed'],correct:1},
+                {q:'Which plastic is best for beginners?',options:['ABS','TPU','PLA','Nylon'],correct:2},
+                {q:'Which material is flexible?',options:['PLA','PETG','ABS','TPU'],correct:3},
+                {q:'What is "infill"?',options:['Outer wall of the model','Internal filling of the model','Nozzle type','Print speed'],correct:1},
+                {q:'Which printer has an enclosed body for ABS printing?',options:['Ender 3 V3 KE','Bambu Lab A1 mini','Bambu Lab P1S','Ender 3 S1'],correct:2},
+                {q:'Why is a heated bed needed?',options:['To dry plastic','Improve first layer adhesion','To cool the model','For calibration'],correct:1},
+                {q:'What feature does the Creality SPARKX i7 Color Combo have?',options:['Laser engraving','AI photo-to-3D conversion and multi-color','Metal printing','Vacuum forming'],correct:1},
+                {q:'What to do if stringing appears?',options:['Increase speed','Adjust retraction and dry filament','Change nozzle','Turn off fan'],correct:1},
+                {q:'Where can you download free 3D models?',options:['YouTube','MakerWorld, Printables','Instagram','Wikipedia'],correct:1},
+                {q:'Why does ABS need ventilation?',options:['To cool plastic faster','To avoid inhaling harmful styrene fumes','For better adhesion','To cool electronics'],correct:1}
+            ],
+            quizResults:{low:"🤔 Not needed yet — but don't worry! Read the guide again and try once more.",mid:'🤓 Need to think — you already have a base! A bit more practice.',high:'🎉 Definitely needed! You are ready for the world of 3D printing!'},
+            faqTitle:'❓ Frequently Asked Questions',
+            faq:[
+                {q:'How much does it cost to start 3D printing?',a:'Minimum budget — about $275 for a printer (Bambu Lab A1 mini or Ender 3 V3 KE) + $15-30 for your first filament.'},
+                {q:'Do I need to know 3D modeling?',a:'No! Sites like MakerWorld and Printables have millions of ready-made models. Modeling is the next step.'},
+                {q:'How long does printing take?',a:'From 30 minutes (small figurine) to 20+ hours (large part). Depends on size, infill, and speed.'},
+                {q:'Which printer to choose for the first time?',a:'Bambu Lab A1 mini — simplest and quietest. Ender 3 V3 KE — more features for the same money.'},
+                {q:'Can I print food/dishes?',a:'Technically PLA is safe, but layer by layer accumulates bacteria. For food contact, use special solutions.'}
+            ],
+            dictTitle:'📚 Vocabulary (English)',
+            dictSubtitle:'Key terms in English for your English lesson',
+            dictHeaders:['English Term','Russian Translation','Context / Example'],
+            dictionary:[
+                {en:'3D Printer',ru:'3D-принтер',ctx:'I want to buy a reliable 3D printer.'},
+                {en:'Filament',ru:'Филамент (пластиковая нить)',ctx:'PLA is the most popular filament for beginners.'},
+                {en:'Extruder',ru:'Экструдер',ctx:'The extruder pushes the filament into the hotend.'},
+                {en:'Nozzle',ru:'Сопло',ctx:'The standard nozzle size is 0.4 mm.'},
+                {en:'Slicer',ru:'Слайсер',ctx:'I use Orca Slicer to prepare my models.'},
+                {en:'Infill',ru:'Заполнение',ctx:'20% infill is enough for most decorative parts.'},
+                {en:'Bed adhesion',ru:'Адгезия к столу',ctx:'Good bed adhesion is key to a successful print.'},
+                {en:'Stringing',ru:'Паутина (нити пластика)',ctx:'I need to adjust retraction to fix stringing.'},
+                {en:'Supports',ru:'Поддержки',ctx:"Don't forget to add supports for overhangs."},
+                {en:'Layer height',ru:'Высота слоя',ctx:'0.2 mm layer height is a good balance of speed and quality.'}
+            ],
+            footerLinksTitle:'Useful Links',
+            footerModelsLabel:'Models:',
+            footerCommunityTitle:'Community',
+            footerDesc:'This site is created for those who want to start their journey into the world of 3D printing. Good luck!',
+            footerRights:'© 2025 World of 3D Printing. Made with 💙 for beginners.',
+            scoreLabel:'Score',
+            restartBtn:'Retake',
+            forWhomLabel:'For whom',
+            featuresLabel:'Features',
+            diffLabel:'Difficulty',
+            tempLabel:'Temp',
+            useLabel:'Use'
+        }
+    };
+
+    function t(key) { return T[currentLang][key]; }
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ru' ? 'en' : 'ru';
+        document.getElementById('langFlag').textContent = currentLang === 'ru' ? '🇷🇺' : '🇬🇧';
+        document.getElementById('langText').textContent = currentLang === 'ru' ? 'RU' : 'EN';
+        renderAll();
+    }
+
+    function renderAll() {
+        const d = T[currentLang];
+        document.getElementById('heroTitle').textContent = d.heroTitle;
+        document.getElementById('heroSubtitle').textContent = d.heroSubtitle;
+
+        document.getElementById('aboutTitle').textContent = d.aboutTitle;
+        document.getElementById('aboutDesc').textContent = d.aboutDesc;
+        document.getElementById('aboutCards').innerHTML = d.aboutCards.map(c => `<div class="glass-card"><div style="font-size:3rem;margin-bottom:1rem">${c.icon}</div><h3 style="font-weight:bold;margin-bottom:0.5rem">${c.title}</h3><p style="color:#a0a0a0">${c.desc}</p></div>`).join('');
+        document.getElementById('materialsTitle').textContent = d.materialsTitle;
+        document.getElementById('materialsCards').innerHTML = d.materials.map(m => `<div class="material-card" style="background:linear-gradient(135deg,${m.color}1a,${m.color}0d);border:1px solid ${m.color}4d"><h3 style="color:${m.color}">${m.name}</h3><p style="margin-bottom:1rem">${m.desc}</p><div style="text-align:left;font-size:0.9rem"><p><strong style="color:${m.color}">${d.diffLabel}:</strong> ${m.diff}</p><p><strong style="color:${m.color}">${d.tempLabel}:</strong> ${m.temp}</p><p><strong style="color:${m.color}">${d.useLabel}:</strong> ${m.use}</p></div></div>`).join('');
+        document.getElementById('printersTitle').textContent = d.printersTitle;
+        document.getElementById('printersSubtitle').textContent = d.printersSubtitle;
+        document.getElementById('printersList').innerHTML = d.printers.map(p => `<div class="printer-item"><div class="printer-name">${p.name}</div><div class="printer-price">${p.price}</div><p style="color:#a0a0a0;margin-bottom:0.5rem"><strong>${d.forWhomLabel}:</strong> ${p.forWhom}</p><p style="color:#a0a0a0"><strong>${d.featuresLabel}:</strong> ${p.features}</p></div>`).join('');
+        document.getElementById('slicerTitle').textContent = d.slicerTitle;
+        document.getElementById('slicerDesc').textContent = d.slicerDesc;
+        document.getElementById('slicerCards').innerHTML = d.slicerCards.map(c => `<div class="glass-card"><div style="font-size:2.5rem;margin-bottom:1rem">${c.icon}</div><h3 style="font-weight:bold;margin-bottom:0.5rem">${c.title}</h3><p style="color:#a0a0a0">${c.desc}</p></div>`).join('');
+        document.getElementById('modelsTitle').textContent = d.modelsTitle;
+        document.getElementById('problemsTitle').textContent = d.problemsTitle;
+        document.getElementById('problemsList').innerHTML = d.problems.map((p,i) => `<div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(${i})"><span>${p.title}</span><span id="acc-icon-${i}">▼</span></div><div class="accordion-content" id="acc-${i}"><p>${p.solution}</p></div></div>`).join('');
+        document.getElementById('safetyTitle').textContent = d.safetyTitle;
+        document.getElementById('postTitle').textContent = d.postTitle;
+        document.getElementById('postDesc').textContent = d.postDesc;
+        document.getElementById('safetyRulesTitle').textContent = d.safetyRulesTitle;
+        document.getElementById('safetyList').innerHTML = d.safetyItems.map(s => `<li style="margin-bottom:0.5rem">⚠️ ${s}</li>`).join('');
+        document.getElementById('whyTitle').textContent = d.whyTitle;
+        document.getElementById('whyCards').innerHTML = d.whyCards.map(c => `<div class="glass-card" style="text-align:center"><div style="font-size:4rem;margin-bottom:1rem">${c.icon}</div><h3 style="font-size:1.5rem;font-weight:bold;margin-bottom:1rem">${c.title}</h3><p style="color:#a0a0a0">${c.desc}</p></div>`).join('');
+        document.getElementById('canPrintTitle').textContent = d.canPrintTitle;
+        document.getElementById('canPrintList').innerHTML = d.canPrint.map(i => `<span class="tag">${i}</span>`).join('');
+        document.getElementById('quizTitle').textContent = d.quizTitle;
+        document.getElementById('quizSubtitle').textContent = d.quizSubtitle;
+        document.getElementById('quizStartBtn').textContent = d.quizStartBtn;
+        document.getElementById('faqTitle').textContent = d.faqTitle;
+        document.getElementById('faqList').innerHTML = d.faq.map((f,i) => `<div class="accordion-item"><div class="accordion-header" onclick="toggleAccordion(${i+100})"><span>${f.q}</span><span id="acc-icon-${i+100}">▼</span></div><div class="accordion-content" id="acc-${i+100}"><p>${f.a}</p></div></div>`).join('');
+        document.getElementById('dictTitle').textContent = d.dictTitle;
+        document.getElementById('dictSubtitle').textContent = d.dictSubtitle;
+        document.getElementById('dictHeader1').textContent = d.dictHeaders[0];
+        document.getElementById('dictHeader2').textContent = d.dictHeaders[1];
+        document.getElementById('dictHeader3').textContent = d.dictHeaders[2];
+        document.getElementById('dictBody').innerHTML = d.dictionary.map(i => `<tr><td style="font-weight:600">${i.en}</td><td style="color:#a0a0a0">${i.ru}</td><td style="color:#a0a0a0;font-style:italic">"${i.ctx}"</td></tr>`).join('');
+        document.getElementById('footerLinksTitle').textContent = d.footerLinksTitle;
+        document.getElementById('footerModelsLabel').textContent = d.footerModelsLabel;
+        document.getElementById('footerCommunityTitle').textContent = d.footerCommunityTitle;
+        document.getElementById('footerDesc').textContent = d.footerDesc;
+        document.getElementById('footerRights').textContent = d.footerRights;
+    }
+
+    function toggleAccordion(id) {
+        const el = document.getElementById('acc-' + id);
+        const icon = document.getElementById('acc-icon-' + id);
+        if (el.classList.contains('active')) {
+            el.classList.remove('active');
+            icon.textContent = '▼';
+        } else {
+            el.classList.add('active');
+            icon.textContent = '▲';
+        }
+    }
+
+    function startQuiz() {
+        currentQuestion = 0; score = 0;
+        document.getElementById('quizStart').style.display = 'none';
+        document.getElementById('quizContent').style.display = 'block';
+        document.getElementById('quizResult').style.display = 'none';
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const d = T[currentLang];
+        const q = d.quiz[currentQuestion];
+        document.getElementById('questionNumber').textContent = (currentQuestion+1) + ' / ' + d.quiz.length;
+        document.getElementById('questionText').textContent = q.q;
+        document.getElementById('progressFill').style.width = ((currentQuestion+1)/d.quiz.length*100)+'%';
+        document.getElementById('optionsContainer').innerHTML = q.options.map((o,i) => `<button class="quiz-option" onclick="selectAnswer(${i})">${o}</button>`).join('');
+    }
+
+    function selectAnswer(idx) {
+        const d = T[currentLang];
+        const q = d.quiz[currentQuestion];
+        const btns = document.querySelectorAll('.quiz-option');
+        btns.forEach((b,i) => {
+            b.disabled = true; b.style.cursor = 'default';
+            if (i === q.correct) b.classList.add('correct');
+            else if (i === idx && idx !== q.correct) b.classList.add('incorrect');
+        });
+        if (idx === q.correct) score++;
+        setTimeout(() => {
+            currentQuestion++;
+            if (currentQuestion < d.quiz.length) showQuestion();
+            else showResult();
+        }, 1500);
+    }
+
+    function showResult() {
+        const d = T[currentLang];
+        document.getElementById('quizContent').style.display = 'none';
+        document.getElementById('quizResult').style.display = 'block';
+        const pct = score / d.quiz.length * 100;
+        let emoji = '📚', text = d.quizResults.low;
+        if (pct >= 80) { emoji = '🏆'; text = d.quizResults.high; }
+        else if (pct >= 40) { emoji = '👍'; text = d.quizResults.mid; }
+        document.getElementById('resultEmoji').textContent = emoji;
+        document.getElementById('resultScore').textContent = d.scoreLabel + ': ' + score + ' / ' + d.quiz.length;
+        document.getElementById('resultText').textContent = text;
+        document.getElementById('restartBtn').textContent = d.restartBtn;
+    }
+
+    function resetQuiz() {
+        document.getElementById('quizStart').style.display = 'block';
+        document.getElementById('quizContent').style.display = 'none';
+        document.getElementById('quizResult').style.display = 'none';
+    }
+
+    // Intersection Observer for fade-in
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Init
+    renderAll();
+    </script>
+</body>
+</html>
